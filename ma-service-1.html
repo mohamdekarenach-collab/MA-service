@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MA.service - غسيل وتلميع السيارات</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --black: #080808;
+      --dark: #0f0f0f;
+      --card: #161616;
+      --red: #e02020;
+      --red2: #ff4444;
+      --red-glow: rgba(224,32,32,0.25);
+      --white: #f5f5f0;
+      --gray: #888;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Cairo', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── SPLASH SCREEN ── */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: #080808;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: splashOut 0.7s ease 2.8s forwards;
+    }
+
+    @keyframes splashOut {
+      to { opacity: 0; pointer-events: none; }
+    }
+
+    .splash-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 90px;
+      letter-spacing: 8px;
+      color: var(--white);
+      opacity: 0;
+      animation: splashLogoIn 0.8s ease 0.3s forwards;
+    }
+
+    .splash-logo span { color: var(--red); }
+
+    @keyframes splashLogoIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .splash-line {
+      width: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--red), var(--red2));
+      margin: 18px 0 14px;
+      animation: splashLine 0.8s ease 1s forwards;
+      border-radius: 2px;
+      box-shadow: 0 0 16px var(--red);
+    }
+
+    @keyframes splashLine { to { width: 260px; } }
+
+    .splash-sub {
+      font-size: 13px;
+      letter-spacing: 5px;
+      color: var(--gray);
+      text-transform: uppercase;
+      opacity: 0;
+      animation: splashLogoIn 0.6s ease 1.4s forwards;
+    }
+
+    .splash-dots {
+      display: flex;
+      gap: 10px;
+      margin-top: 50px;
+    }
+
+    .splash-dots span {
+      width: 8px; height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: dotPulse 0.6s ease infinite alternate;
+    }
+
+    .splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dotPulse {
+      from { opacity: 0.2; transform: scale(0.8); }
+      to   { opacity: 1;   transform: scale(1.2); }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #080808;
+      overflow: hidden;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    /* animated red spotlight */
+    .hero-spotlight {
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,20,20,0.18) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spotlight 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes spotlight {
+      0%,100% { transform: translate(-60%, -50%) scale(1);   }
+      50%      { transform: translate(-40%, -50%) scale(1.2); }
+    }
+
+    /* grid lines */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(255,255,255,0.02) 80px, rgba(255,255,255,0.02) 81px),
+        repeating-linear-gradient(0deg,  transparent, transparent 80px, rgba(255,255,255,0.02) 80px, rgba(255,255,255,0.02) 81px);
+      pointer-events: none;
+    }
+
+    /* big car silhouette */
+    .car-bg {
+      position: absolute;
+      font-size: 420px;
+      opacity: 0.035;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: blur(3px);
+      animation: float 7s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0%,100% { transform: translateX(-50%) translateY(0);    }
+      50%      { transform: translateX(-50%) translateY(-20px); }
+    }
+
+    /* red side stripes */
+    .hero-stripe {
+      position: absolute;
+      left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, var(--red) 30%, var(--red2) 70%, transparent 100%);
+      box-shadow: 0 0 20px var(--red);
+      animation: stripeSlide 3s ease-in-out infinite alternate;
+    }
+    .hero-stripe.top    { top: 0; }
+    .hero-stripe.bottom { bottom: 0; }
+
+    @keyframes stripeSlide {
+      from { opacity: 0.4; }
+      to   { opacity: 1;   }
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      padding: 6px 20px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 0 20px var(--red-glow);
+      animation: fadeUp 0.8s ease 3.2s both;
+    }
+
+    .hero-tagline {
+      font-size: clamp(20px, 4vw, 30px);
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 6px;
+      animation: fadeUp 0.8s ease 3.3s both;
+      letter-spacing: 1px;
+    }
+
+    .hero-tagline span {
+      color: var(--red);
+      font-size: clamp(28px, 6vw, 48px);
+      display: block;
+      text-shadow: 0 0 30px var(--red);
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(80px, 18vw, 180px);
+      letter-spacing: 6px;
+      line-height: 0.85;
+      color: var(--white);
+      text-shadow: 0 0 60px rgba(200,20,20,0.4);
+      animation: fadeUp 0.9s ease 3.4s both;
+      position: relative;
+    }
+
+    .hero-title::after {
+      content: 'MA.SERVICE';
+      position: absolute;
+      inset: 0;
+      color: var(--red);
+      clip-path: inset(0 100% 0 0);
+      animation: glitchReveal 1s ease 3.4s forwards;
+    }
+
+    @keyframes glitchReveal {
+      to { clip-path: inset(0 0% 0 0); opacity: 0; }
+    }
+
+    .hero-sub {
+      font-size: clamp(13px, 2.5vw, 18px);
+      color: var(--gray);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-top: 16px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.8s ease 3.5s both;
+    }
+
+    .hero-location {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--red2);
+      font-weight: 600;
+      margin-bottom: 40px;
+      animation: fadeUp 0.8s ease 3.6s both;
+    }
+
+    .stars {
+      color: #fbbf24;
+      font-size: 22px;
+      letter-spacing: 3px;
+      margin-bottom: 36px;
+      animation: fadeUp 0.8s ease 3.55s both;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.8s ease 3.7s both;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: var(--white);
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 14px 36px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px var(--red-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 40px rgba(224,32,32,0.5);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 13px 36px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 50px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s, color 0.2s;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--red);
+      color: var(--red);
+      transform: translateY(-3px);
+    }
+
+    /* trust bar */
+    .trust-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(90deg, var(--red) 0%, #900 50%, var(--red) 100%);
+      padding: 12px 0;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      animation: fadeUp 0.8s ease 3.8s both;
+      overflow: hidden;
+    }
+
+    .trust-bar::before {
+      content: '////';
+      position: absolute; left: 16px; opacity: 0.3; font-size: 18px;
+    }
+    .trust-bar::after {
+      content: '////';
+      position: absolute; right: 16px; opacity: 0.3; font-size: 18px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* DIVIDER */
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+      margin: 0 40px;
+      opacity: 0.4;
+      box-shadow: 0 0 8px var(--red-glow);
+    }
+
+    /* SECTION */
+    section {
+      padding: 80px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--red2);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(42px, 8vw, 72px);
+      text-align: center;
+      letter-spacing: 2px;
+      margin-bottom: 60px;
+      color: var(--white);
+      text-shadow: 0 0 40px rgba(200,20,20,0.3);
+    }
+
+    /* SERVICES */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .service-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 40px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      cursor: default;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--red), var(--red2));
+      transform: scaleX(0);
+      transition: transform 0.3s;
+      box-shadow: 0 0 12px var(--red);
+    }
+
+    .service-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(224,32,32,0.3);
+      box-shadow: 0 20px 60px rgba(200,20,20,0.15);
+    }
+
+    .service-card:hover::before { transform: scaleX(1); }
+
+    .service-card.featured {
+      border-color: rgba(224,32,32,0.3);
+      background: linear-gradient(135deg, #1a0000, #161616);
+    }
+
+    .service-card.featured::after {
+      content: '⭐ الأكثر طلباً';
+      position: absolute;
+      top: 16px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .service-icon {
+      font-size: 56px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .service-name {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+
+    .service-desc {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+
+    .service-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 52px;
+      letter-spacing: 2px;
+      color: var(--red2);
+      text-shadow: 0 0 20px var(--red-glow);
+    }
+
+    .service-price span {
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    /* WHY US */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-item {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .feature-item:hover { border-color: rgba(224,32,32,0.3); transform: translateY(-4px); }
+
+    .feature-icon { font-size: 40px; margin-bottom: 16px; display: block; }
+    .feature-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feature-text { font-size: 13px; color: var(--gray); line-height: 1.7; }
+
+    /* BOOKING */
+    .booking-wrap {
+      background: var(--card);
+      border: 1px solid rgba(224,32,32,0.2);
+      border-radius: 24px;
+      padding: 50px 40px;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .booking-wrap::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(200,20,20,0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .booking-wrap h3 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .booking-wrap p {
+      color: var(--gray);
+      text-align: center;
+      margin-bottom: 36px;
+      font-size: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--red2);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: var(--white);
+      font-family: 'Cairo', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--red);
+    }
+
+    .form-group select option { background: #161616; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: var(--white);
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px var(--red-glow);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(224,32,32,0.5);
+    }
+
+    /* CONTACT */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .contact-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--white);
+      transition: border-color 0.3s, transform 0.3s;
+      display: block;
+    }
+
+    .contact-card:hover {
+      border-color: var(--red);
+      transform: translateY(-4px);
+    }
+
+    .contact-card .icon { font-size: 40px; margin-bottom: 14px; display: block; }
+    .contact-card .label { font-size: 13px; color: var(--gray); margin-bottom: 6px; }
+    .contact-card .value { font-size: 18px; font-weight: 700; color: var(--red2); }
+
+    /* FOOTER */
+    footer {
+      background: var(--dark);
+      border-top: 1px solid rgba(224,32,32,0.15);
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 4px;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .footer-logo span { color: var(--red); }
+
+    .footer-text {
+      font-size: 13px;
+      color: var(--gray);
+    }
+
+    .footer-location {
+      font-size: 13px;
+      color: var(--red2);
+      margin-top: 6px;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color: var(--white);
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 32px;
+      border-radius: 50px;
+      box-shadow: 0 8px 32px var(--red-glow);
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(8,8,8,0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(224,32,32,0.15);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 3px;
+      color: var(--white);
+    }
+
+    .nav-logo span { color: var(--red); }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--red2); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .booking-wrap { padding: 32px 20px; }
+      .trust-bar { gap: 16px; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-logo"><span>MA</span>.SERVICE</div>
+  <div class="splash-line"></div>
+  <div class="splash-sub">Auto Detailing • Chlef - Chorfa</div>
+  <div class="splash-dots">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>MA</span>.SERVICE</div>
+  <ul class="nav-links">
+    <li><a href="#services">الخدمات</a></li>
+    <li><a href="#booking">حجز موعد</a></li>
+    <li><a href="#contact">تواصل معنا</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero" style="padding-top:80px; padding-bottom:60px;">
+  <div class="hero-spotlight"></div>
+  <div class="hero-stripe top"></div>
+  <div class="hero-stripe bottom"></div>
+  <div class="car-bg">🚗</div>
+
+  <div class="badge">✦ MA Service Detailing ✦ Chlef - Chorfa ✦</div>
+  <div class="hero-tagline">ثقتكم هي <span>دافعنا</span></div>
+  <div class="hero-title">MA.SERVICE</div>
+  <div class="hero-sub">غسيل • تلميع • تغليف احترافي</div>
+  <div class="stars">★★★★★</div>
+  <div class="hero-location">📍 Chlef - Chorfa</div>
+  <div class="hero-btns">
+    <a href="#booking" class="btn-primary">📅 احجز موعد الآن</a>
+    <a href="#services" class="btn-outline">اكتشف خدماتنا</a>
+  </div>
+
+  <div class="trust-bar">
+    <span>CONFIANCE</span>
+    <span>✦</span>
+    <span>QUALITÉ</span>
+    <span>✦</span>
+    <span>SATISFACTION</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-label">✦ ما نقدمه لك</div>
+  <div class="section-title">خدماتنا</div>
+  <div class="services-grid">
+
+    <div class="service-card">
+      <span class="service-icon">🚿</span>
+      <div class="service-name">غسيل عادي</div>
+      <div class="service-desc">غسيل خارجي كامل للسيارة بالماء والصابون مع تنظيف الزجاج والإطارات</div>
+      <div class="service-price">1000<span> DA</span></div>
+    </div>
+
+    <div class="service-card featured">
+      <span class="service-icon">✨</span>
+      <div class="service-name" style="margin-top:20px;">غسيل احترافي</div>
+      <div class="service-desc">غسيل داخلي وخارجي شامل مع تنظيف عميق للمقاعد والسجاد والزجاج</div>
+      <div class="service-price">2500<span> DA</span></div>
+    </div>
+
+    <div class="service-card">
+      <span class="service-icon">💎</span>
+      <div class="service-name">Lifting & تلميع</div>
+      <div class="service-desc">تلميع احترافي وحماية كاملة للطلاء مع معالجة الخدوش وتغليف السيارة</div>
+      <div class="service-price">10000<span> DA</span></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WHY US -->
+<section>
+  <div class="section-label">✦ لماذا تختارنا</div>
+  <div class="section-title">مميزاتنا</div>
+  <div class="features-grid">
+    <div class="feature-item">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">سرعة في التنفيذ</div>
+      <div class="feature-text">نحترم وقتك ونضمن إنجاز العمل في أسرع وقت ممكن</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">🏆</span>
+      <div class="feature-title">جودة عالية</div>
+      <div class="feature-text">نستخدم أفضل المنتجات والمعدات الاحترافية لنتيجة مثالية</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">🛡️</span>
+      <div class="feature-title">ضمان الرضا</div>
+      <div class="feature-text">إذا لم تكن راضياً، نعيد العمل مجاناً حتى تكون سعيداً</div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">📍</span>
+      <div class="feature-title">خدمة في عين المكان</div>
+      <div class="feature-text">يمكننا التنقل إليك أينما كنت لتقديم الخدمة</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="section-label">✦ وفر وقتك</div>
+  <div class="section-title">احجز موعدك</div>
+  <div class="booking-wrap">
+    <h3>📅 حجز موعد سريع</h3>
+    <p>أدخل بياناتك وسنتواصل معك لتأكيد الموعد</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>الاسم الكامل</label>
+        <input type="text" id="name" placeholder="محمد أحمد" />
+      </div>
+      <div class="form-group">
+        <label>رقم الهاتف</label>
+        <input type="tel" id="phone" placeholder="05XXXXXXXX" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>نوع الخدمة</label>
+      <select id="service">
+        <option value="">اختر الخدمة...</option>
+        <option value="غسيل عادي - 1000 DA">🚿 غسيل عادي - 1000 DA</option>
+        <option value="غسيل احترافي - 2500 DA">✨ غسيل احترافي - 2500 DA</option>
+        <option value="Lifting وتلميع - 10000 DA">💎 Lifting وتلميع - 10000 DA</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>التاريخ</label>
+        <input type="date" id="date" />
+      </div>
+      <div class="form-group">
+        <label>الوقت</label>
+        <input type="time" id="time" />
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="bookNow()">✅ تأكيد الحجز عبر واتساب</button>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">✦ نحن هنا لك</div>
+  <div class="section-title">تواصل معنا</div>
+  <div class="contact-grid">
+    <a class="contact-card" href="https://wa.me/213550829761" target="_blank">
+      <span class="icon">💬</span>
+      <div class="label">واتساب</div>
+      <div class="value">0550 829 761</div>
+    </a>
+    <a class="contact-card" href="tel:0550829761">
+      <span class="icon">📞</span>
+      <div class="label">اتصل بنا</div>
+      <div class="value">0550 829 761</div>
+    </a>
+    <div class="contact-card">
+      <span class="icon">🕐</span>
+      <div class="label">أوقات العمل</div>
+      <div class="value">08:00 - 20:00</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo"><span>MA</span>.SERVICE</div>
+  <div class="footer-text">Auto Detailing احترافي 🚗✨</div>
+  <div class="footer-location">📍 Chlef - Chorfa &nbsp;|&nbsp; 📞 0550 829 761</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ تم إرسال طلبك عبر واتساب!</div>
+
+<script>
+  function bookNow() {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const service = document.getElementById('service').value;
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
+
+    if (!name || !phone || !service || !date || !time) {
+      alert('⚠️ يرجى ملء جميع الحقول');
+      return;
+    }
+
+    const msg = `مرحباً MA.service 👋\n\nأريد حجز موعد:\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}\n🔧 الخدمة: ${service}\n📅 التاريخ: ${date}\n⏰ الوقت: ${time}\n\nشكراً!`;
+    const url = `https://wa.me/213550829761?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3500);
+  }
+
+  // Set min date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date').min = today;
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+
+</body>
+</html>
